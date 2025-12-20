@@ -29,9 +29,12 @@ pipeline {
             }
         }
 
-        stage('Manual Approval') {
+  stage('Manual Approval') {
             when {
-                branch 'main'
+                expression { 
+                    // This checks multiple ways Jenkins might store the branch name
+                    return env.GIT_BRANCH == 'origin/main' || env.BRANCH_NAME == 'main' || env.GIT_BRANCH == 'main'
+                }
             }
             steps {
                 input message: "Review Plan? Proceed with Apply?", ok: "Proceed"
@@ -40,7 +43,9 @@ pipeline {
 
         stage('Terraform Apply') {
             when {
-                branch 'main'
+                expression { 
+                    return env.GIT_BRANCH == 'origin/main' || env.BRANCH_NAME == 'main' || env.GIT_BRANCH == 'main'
+                }
             }
             steps {
                 dir('aws-S3') {
