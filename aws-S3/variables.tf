@@ -1,5 +1,5 @@
 variable "bucketName" {
     description = "The name of the S3 bucket"
     type        = string
-    default = "jeyas-S3"
+    default = "jeyas-s3"
 }
