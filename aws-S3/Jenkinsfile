@@ -12,13 +12,13 @@ pipeline {
     stages {
         stage('Terraform Init') {
             steps {
-                sh 'terraform init'
+                bat 'terraform init'
             }
         }
 
         stage('Terraform Plan') {
             steps {
-                sh "terraform plan -out=${env.TF_PLAN_FILE}"
+                bat "terraform plan -out=${env.TF_PLAN_FILE}"
             }
         }
 
@@ -36,7 +36,7 @@ pipeline {
                 branch 'main'
             }
             steps {
-                sh "terraform apply -auto-approve ${env.TF_PLAN_FILE}"
+                bat "terraform apply -auto-approve ${env.TF_PLAN_FILE}"
             }
         }
     }
