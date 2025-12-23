@@ -1,0 +1,33 @@
+pipeline {
+    agent any
+
+    options {
+        ansiColor('xterm')
+    }
+
+    environment {
+    TF_HOME = tool 'terraform'
+    AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+}
+    
+    stages {
+        stage('Init & Plan') {
+            steps {
+       
+                bat "\"${TF_HOME}\\terraform.exe\" init"
+                bat "\"${TF_HOME}\\terraform.exe\" plan -out=tfplan"
+            }
+        }
+        
+        stage('Apply') {
+            when { branch 'main' } 
+            
+            steps {
+                input message: "Looks good? Deploy to AWS?", ok: "Proceed"
+                
+                bat "\"${TF_HOME}\\terraform.exe\" apply -auto-approve tfplan"
+            }
+        }
+    }
+}
