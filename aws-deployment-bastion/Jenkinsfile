@@ -13,14 +13,15 @@ pipeline {
     
     stages {
         stage('Init & Plan') {
-            steps {
-                // Change directory to where your main.tf is
-                dir('aws-deployment-bastion') {
-                    bat "\"${TF_HOME}\\terraform.exe\" init"
-                    bat "\"${TF_HOME}\\terraform.exe\" plan -out=tfplan"
-                }
-            }
+    steps {
+        dir('aws-deployment-bastion') {
+            // '-upgrade' tells Terraform to ignore the old cached modules and download them fresh
+            bat "\"${TF_HOME}\\terraform.exe\" init -upgrade"
+            bat "\"${TF_HOME}\\terraform.exe\" plan -out=tfplan"
         }
+    }
+}
+        
         
         stage('Apply') {
             when { branch 'main' } 
