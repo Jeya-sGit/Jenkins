@@ -1,0 +1,40 @@
+pipeline {
+    agent any
+
+    options {
+        ansiColor('xterm')
+    }
+
+    environment {
+        TF_HOME = tool 'terraform'
+        AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
+        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+    }
+    
+    stages {
+        stage('Init & Plan') {
+    steps {
+        dir('aws-deployment-bastion') {
+            // '-upgrade' tells Terraform to ignore the old cached modules and download them fresh
+            bat "\"${TF_HOME}\\terraform.exe\" init -upgrade"
+            bat "\"${TF_HOME}\\terraform.exe\" plan -out=tfplan"
+        }
+    }
+}
+        
+        
+        stage('Apply') {
+            when { branch 'main' } 
+            
+            steps {
+                script {
+                    input message: "Looks good? Deploy to AWS?", ok: "Proceed"
+                }
+                
+                dir('aws-deployment-bastion') {
+                    bat "\"${TF_HOME}\\terraform.exe\" apply -auto-approve tfplan"
+                }
+            }
+        }
+    }
+}
