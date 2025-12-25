@@ -1,7 +1,7 @@
 variable "project_name" {
     description = "The name of the project"
     type        = string
-    default = "Terraform-Jenkins-Project-1"
+    default = "AWS-HA-App"
 }
 
 variable "instance_type" {
