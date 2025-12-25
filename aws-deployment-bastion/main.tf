@@ -51,14 +51,14 @@ resource "aws_instance" "bastion" {
 }
 
 module "vpc" {
-  source = "git::https://github.com/Jeya-sGit/Terraform.git//aws-vpc-asg-infra-modular/vpc?ref=main"
+  source = "git::https://github.com/Jeya-sGit/Terraform.git//aws-vpc-asg-infra-modular/modules/vpc?ref=main"
 
   project_name = var.project_name
   vpc_cidr     = "10.0.0.0/16"
 }
 
 module "compute" {
-  source = "git::https://github.com/Jeya-sGit/Terraform.git//aws-vpc-asg-infra-modular/compute?ref=main"
+  source = "git::https://github.com/Jeya-sGit/Terraform.git//aws-vpc-asg-infra-modular/modules/compute?ref=main"
 
   project_name = var.project_name
 
