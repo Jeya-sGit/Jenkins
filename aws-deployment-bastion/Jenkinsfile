@@ -1,6 +1,12 @@
 pipeline {
     agent any
 
+    parameters {
+        choice(name: 'TF_ACTION', 
+               choices: ['plan', 'apply', 'destroy'], 
+               description: 'Select the Terraform action to perform')
+    }
+
     options {
         ansiColor('xterm')
     }
@@ -10,29 +16,32 @@ pipeline {
         AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
     }
-    
+
     stages {
-        stage('Init & Plan') {
-    steps {
-        dir('aws-deployment-bastion') {
-            // '-upgrade' tells Terraform to ignore the old cached modules and download them fresh
-            bat "\"${TF_HOME}\\terraform.exe\" init -upgrade"
-            bat "\"${TF_HOME}\\terraform.exe\" plan -out=tfplan"
-        }
-    }
-}
-        
-        
-        stage('Apply') {
-            when { branch 'main' } 
-            
+        stage('Terraform Init') {
             steps {
-                script {
-                    input message: "Looks good? Deploy to AWS?", ok: "Proceed"
-                }
-                
                 dir('aws-deployment-bastion') {
-                    bat "\"${TF_HOME}\\terraform.exe\" apply -auto-approve tfplan"
+                    bat "\"${TF_HOME}\\terraform.exe\" init -upgrade"
+                }
+            }
+        }
+
+        stage('Terraform Action') {
+            steps {
+                dir('aws-deployment-bastion') {
+                    script {
+                        if (params.TF_ACTION == 'plan') {
+                            bat "\"${TF_HOME}\\terraform.exe\" plan -out=tfplan"
+                        } 
+                        else if (params.TF_ACTION == 'apply') {
+                            input message: "Apply these changes to AWS?", ok: "Proceed"
+                            bat "\"${TF_HOME}\\terraform.exe\" apply -auto-approve"
+                        } 
+                        else if (params.TF_ACTION == 'destroy') {
+                            input message: "ARE YOU SURE? This will delete all infra in AWS!", ok: "YES, NUKE IT"
+                            bat "\"${TF_HOME}\\terraform.exe\" destroy -auto-approve"
+                        }
+                    }
                 }
             }
         }
